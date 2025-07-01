@@ -1,0 +1,88 @@
+// NASA Space Image Gallery Example
+
+// Your NASA API key goes here
+const apiKey = 'iTLzGiHNJU4O6z4BWtc8YafzfDStiCM367D68r8Q';
+
+// Select the elements from the HTML (make sure these exist in your HTML file)
+const gallery = document.getElementById('gallery'); // Where images will be shown
+const startInput = document.getElementById('start-date'); // Start date input
+const endInput = document.getElementById('end-date'); // End date input
+const getImagesBtn = document.getElementById('get-images'); // Button to get images
+
+// Function to fetch images from NASA API for a date range
+function fetchSpaceImages(startDate, endDate) {
+  // Build the API URL with start and end dates
+  const apiUrl = `https://api.nasa.gov/planetary/apod?api_key=${apiKey}&start_date=${startDate}&end_date=${endDate}`;
+
+  // Fetch data from the API
+  fetch(apiUrl)
+    .then(response => response.json())
+    .then(data => {
+      // Clear the gallery before showing new images
+      gallery.innerHTML = '';
+
+      // Loop through each item in the data array
+      data.forEach(item => {
+        // Only show images (not videos)
+        if (item.media_type === 'image') {
+          // Create a div for each gallery item
+          const itemDiv = document.createElement('div');
+          itemDiv.className = 'gallery-item';
+
+          // Create the image element
+          const image = document.createElement('img');
+          image.src = item.url;
+          image.alt = item.title;
+
+          // Create the title element
+          const title = document.createElement('h3');
+          title.textContent = item.title;
+
+          // Create the date element
+          const date = document.createElement('p');
+          date.textContent = `Date: ${item.date}`;
+
+          // Create the description element
+          const description = document.createElement('p');
+          description.textContent = item.explanation;
+
+          // Add the image, title, date, and description to the gallery item
+          itemDiv.appendChild(image);
+          itemDiv.appendChild(title);
+          itemDiv.appendChild(date);
+          itemDiv.appendChild(description);
+
+          // Add the gallery item to the gallery
+          gallery.appendChild(itemDiv);
+        }
+      });
+
+      // If no images found, show a message
+      if (gallery.innerHTML === '') {
+        gallery.innerHTML = '<p>No images found for this date range.</p>';
+      }
+    })
+    .catch(error => {
+      // Show an error message if something goes wrong
+      gallery.innerHTML = `<p>Error fetching images: ${error.message}</p>`;
+    });
+}
+
+// When the user clicks the button, get the selected dates and fetch images
+getImagesBtn.addEventListener('click', () => {
+  // Get the values from the date inputs
+  const startDate = startInput.value;
+  const endDate = endInput.value;
+
+  // Only fetch if both dates are selected
+  if (startDate && endDate) {
+    fetchSpaceImages(startDate, endDate);
+  } else {
+    gallery.innerHTML = '<p>Please select both start and end dates.</p>';
+  }
+});
+<!-- Place this in your HTML file -->
+<input type="date" id="start-date">
+<input type="date" id="end-date">
+<button id="get-images">Get Space Images</button>
+<div id="gallery"></div>
